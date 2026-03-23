@@ -7,8 +7,15 @@ pub struct CrearProducto {
     pub stock: i32,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct ActualizarProducto {
+    pub nombre: String,
+    pub precio: f64,
+    pub stock: i32,
+}
+
 #[derive(Debug, Serialize)]
-pub struct ListarProducto {
+pub struct Producto {
     pub id: i32,
     pub nombre: String,
     pub precio: f64,
