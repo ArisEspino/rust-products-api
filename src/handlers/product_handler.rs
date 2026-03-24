@@ -1,9 +1,9 @@
+use actix_web::{HttpResponse, Responder, web};
+use sea_orm::EntityTrait;
+
 use crate::entities::productos;
 use crate::models::product_models::{CrearProducto, Producto};
 use crate::state::AppState;
-
-use actix_web::{HttpResponse, Responder, web};
-use sea_orm::EntityTrait;
 
 pub async fn crear_producto(
     data: web::Data<AppState>,

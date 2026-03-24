@@ -3,6 +3,7 @@ mod handlers;
 mod routes;
 mod state;
 mod models;
+mod errors;
 
 use actix_web::{App, HttpServer, web};
 use dotenvy::dotenv;
