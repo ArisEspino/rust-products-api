@@ -6,5 +6,8 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg
     .route("/producto", web::post().to(product_handler::crear_producto))
     .route("/productos", web::get().to(product_handler::listar_productos))
-    .route("/producto/{id}", web::get().to(product_handler::obtener_producto_por_id));
-}   
+    .route("/producto/{id}", web::get().to(product_handler::obtener_producto_por_id))
+    .route("/producto/{id}", web::put().to(product_handler::actualizar_producto))
+    .route("/producto/{id}", web::delete().to(product_handler::eliminar_producto));
+}
+

@@ -1,11 +1,12 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, web};
 use rust_decimal::Decimal;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, EntityTrait};
+use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait};
+
 
 use crate::entities::productos;
 use crate::errors::errors::ApiError;
-use crate::models::product_models::{CrearProducto, Producto};
+use crate::models::product_models::{ActualizarProducto, CrearProducto, Producto};
 use crate::state::AppState;
 
 pub async fn crear_producto(
@@ -107,4 +108,113 @@ pub async fn listar_productos(data: web::Data<AppState>) -> impl Responder {
         ),
         Err(_) => HttpResponse::InternalServerError().body("Error al obtener los productos"),
     }
+}
+
+pub async fn actualizar_producto(
+    req: HttpRequest,
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+    body: web::Json<ActualizarProducto>,
+) -> Result<HttpResponse, ApiError> {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|value| value.to_str().ok());
+
+    let expected = format!("Bearer {}", data.api_token);
+
+    match auth_header {
+        Some(token) if token == expected => {}
+        _ => return Err(ApiError::Unauthorized),
+    }
+
+    let id = path
+        .into_inner()
+        .parse::<i32>()
+        .map_err(|_| ApiError::InvalidInput)?;
+
+    let nombre = body.nombre.trim();
+
+    if nombre.is_empty() {
+        return Err(ApiError::InvalidInput);
+    }
+
+    if body.precio <= Decimal::new(0, 0) {
+        return Err(ApiError::InvalidInput);
+    }
+
+    if body.stock < 0 {
+        return Err(ApiError::InvalidInput);
+    }
+
+    let producto_encontrado = productos::Entity::find_by_id(id)
+        .one(&data.db)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    let producto_encontrado = match producto_encontrado {
+        Some(producto) => producto,
+        None => return Err(ApiError::NotFound),
+    };
+
+    let mut producto_activo: productos::ActiveModel = producto_encontrado.into();
+
+    producto_activo.nombre = Set(nombre.to_string());
+    producto_activo.precio = Set(body.precio);
+    producto_activo.stock = Set(body.stock);
+
+    let producto_actualizado = producto_activo
+        .update(&data.db)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    let response = Producto {
+        id: producto_actualizado.id,
+        nombre: producto_actualizado.nombre,
+        precio: producto_actualizado.precio,
+        stock: producto_actualizado.stock,
+        creado_el: producto_actualizado.creado_el.to_string(),
+    };
+
+    Ok(HttpResponse::Ok().json(response))
+}
+
+pub async fn eliminar_producto(
+    req: HttpRequest,
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+) -> Result<HttpResponse, ApiError> {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|value| value.to_str().ok());
+
+    let expected = format!("Bearer {}", data.api_token);
+
+    match auth_header {
+        Some(token) if token == expected => {}
+        _ => return Err(ApiError::Unauthorized),
+    }
+
+    let id = path
+        .into_inner()
+        .parse::<i32>()
+        .map_err(|_| ApiError::InvalidInput)?;
+
+    let producto = productos::Entity::find_by_id(id)
+        .one(&data.db)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    let producto = match producto {
+        Some(producto) => producto,
+        None => return Err(ApiError::NotFound),
+    };
+
+    producto
+        .delete(&data.db)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    Ok(HttpResponse::Ok().body("Producto eliminado exitosamente"))
 }
