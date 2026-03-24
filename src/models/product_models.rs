@@ -8,12 +8,12 @@ pub struct CrearProducto {
     pub stock: i32,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct ActualizarProducto {
-    pub nombre: String,
-    pub precio: Decimal,
-    pub stock: i32,
-}
+// #[derive(Debug, Deserialize)]
+// pub struct ActualizarProducto {
+//     pub nombre: String,
+//     pub precio: Decimal,
+//     pub stock: i32,
+// }
 
 #[derive(Debug, Serialize)]
 pub struct Producto {
