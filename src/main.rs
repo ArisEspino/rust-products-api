@@ -1,13 +1,14 @@
+mod entities;
+mod handlers;
+mod routes;
+mod state;
+mod models;
+
 use actix_web::{App, HttpServer, web};
 use dotenvy::dotenv;
-use sea_orm::{Database};
+use sea_orm::Database;
+use state::AppState;
 use std::env;
-
-mod entities;
-mod handlers {
-    pub mod product_handler;
-}
-use handlers::product_handler;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -19,12 +20,12 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Error al conectar a la base de datos");
 
-    let db_data = web::Data::new(db);
+    let state = web::Data::new(AppState { db });
 
     HttpServer::new(move || {
         App::new()
-            .app_data(db_data.clone())
-            .route("/productos", web::get().to(product_handler::get_productos))
+            .app_data(state.clone())
+            .configure(routes::product_routes::config)
     })
     .bind("127.0.0.1:8080")?
     .run()
