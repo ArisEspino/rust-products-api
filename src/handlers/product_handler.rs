@@ -1,7 +1,7 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, web};
+use rust_decimal::Decimal;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, EntityTrait};
-use rust_decimal::Decimal;
 
 use crate::entities::productos;
 use crate::errors::errors::ApiError;
@@ -13,22 +13,25 @@ pub async fn crear_producto(
     data: web::Data<AppState>,
     body: web::Json<CrearProducto>,
 ) -> Result<HttpResponse, ApiError> {
-    let auth_header = req.headers().get("Authorization").and_then(|value| value.to_str().ok());
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|value| value.to_str().ok());
 
-    let expected = format!("Bearer {}", data.api_token);    
+    let expected = format!("Bearer {}", data.api_token);
 
     match auth_header {
         Some(token) if token == expected => {}
         _ => return Err(ApiError::Unauthorized),
-    } 
+    }
 
     let nombre = body.nombre.trim();
 
-    if nombre.is_empty(){
+    if nombre.is_empty() {
         return Err(ApiError::InvalidInput);
     }
 
-    if body.precio <= Decimal::new(0,0){
+    if body.precio <= Decimal::new(0, 0) {
         return Err(ApiError::InvalidInput);
     }
 
@@ -36,7 +39,7 @@ pub async fn crear_producto(
         return Err(ApiError::InvalidInput);
     }
 
-    let nuevo_producto = productos::ActiveModel{
+    let nuevo_producto = productos::ActiveModel {
         nombre: Set(nombre.to_string()),
         precio: Set(body.precio),
         stock: Set(body.stock),
@@ -58,7 +61,34 @@ pub async fn crear_producto(
     }
 }
 
+pub async fn obtener_producto_por_id(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+) -> Result<HttpResponse, ApiError> {
+    let id = path
+        .into_inner()
+        .parse::<i32>()
+        .map_err(|_| ApiError::InvalidInput)?;
 
+    let producto_db = productos::Entity::find_by_id(id)
+        .one(&data.db)
+        .await
+        .map_err(|_| ApiError::InternalServerError)?;
+
+    match producto_db {
+        Some(producto) => {
+            let response = Producto {
+                id: producto.id,
+                nombre: producto.nombre,
+                precio: producto.precio,
+                stock: producto.stock,
+                creado_el: producto.creado_el.to_string(),
+            };
+            Ok(HttpResponse::Ok().json(response))
+        }
+        None => Err(ApiError::NotFound),
+    }
+}
 
 pub async fn listar_productos(data: web::Data<AppState>) -> impl Responder {
     let productos_db = productos::Entity::find().all(&data.db).await;

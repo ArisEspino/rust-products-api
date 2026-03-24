@@ -3,8 +3,8 @@ use derive_more::Display;
 
 #[derive(Display, Debug)]
 pub enum ApiError {
-    // #[display("Producto no encontrado.")]
-    // NotFound,
+    #[display("Producto no encontrado.")]
+    NotFound,
     #[display("Datos de entrada inválidos.")]
     InvalidInput,
     #[display("No autorizado.")]
@@ -16,7 +16,7 @@ pub enum ApiError {
 impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
-         
+            ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::InvalidInput => StatusCode::BAD_REQUEST,
             ApiError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::Unauthorized => StatusCode::UNAUTHORIZED,
