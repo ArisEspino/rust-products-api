@@ -65,6 +65,7 @@ pub async fn obtener_producto_por_id(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<HttpResponse, ApiError> {
+    
     let auth_header = req
         .headers()
         .get("Authorization")
@@ -127,7 +128,7 @@ pub async fn actualizar_producto(
     path: web::Path<String>,
     body: web::Json<ProductoRequest>,
 ) -> Result<HttpResponse, ApiError> {
-    
+
     let auth_header = req
         .headers()
         .get("Authorization")
