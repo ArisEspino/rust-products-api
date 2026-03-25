@@ -21,6 +21,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(state.clone())
             .configure(routes::product_routes::config)
     })
+    
     .bind(format!("{}:{}", config.host, config.port))?
     .run()
     .await

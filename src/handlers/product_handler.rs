@@ -2,10 +2,9 @@ use actix_web::{HttpRequest, HttpResponse, Responder, web};
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait};
 
-
 use crate::entities::productos;
 use crate::errors::errors::ApiError;
-use crate::models::product_models::{ProductoRequest, Producto};
+use crate::models::product_models::{Producto, ProductoRequest};
 use crate::state::AppState;
 
 pub async fn crear_producto(
@@ -62,9 +61,22 @@ pub async fn crear_producto(
 }
 
 pub async fn obtener_producto_por_id(
+    req: HttpRequest,
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<HttpResponse, ApiError> {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|value| value.to_str().ok());
+
+    let expected = format!("Bearer {}", data.api_token);
+
+    match auth_header {
+        Some(token) if token == expected => {}
+        _ => return Err(ApiError::Unauthorized),
+    }
+
     let id = path
         .into_inner()
         .parse::<i32>()
@@ -115,6 +127,7 @@ pub async fn actualizar_producto(
     path: web::Path<String>,
     body: web::Json<ProductoRequest>,
 ) -> Result<HttpResponse, ApiError> {
+    
     let auth_header = req
         .headers()
         .get("Authorization")
