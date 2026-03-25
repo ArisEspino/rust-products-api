@@ -2,14 +2,7 @@ use serde::{Deserialize, Serialize};
 use rust_decimal::Decimal;
 
 #[derive(Debug, Deserialize)]
-pub struct CrearProducto {
-    pub nombre: String,
-    pub precio: Decimal,
-    pub stock: i32,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ActualizarProducto {
+pub struct ProductoRequest {
     pub nombre: String,
     pub precio: Decimal,
     pub stock: i32,

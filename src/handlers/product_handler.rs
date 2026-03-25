@@ -6,13 +6,13 @@ use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait};
 
 use crate::entities::productos;
 use crate::errors::errors::ApiError;
-use crate::models::product_models::{ActualizarProducto, CrearProducto, Producto};
+use crate::models::product_models::{ProductoRequest, Producto};
 use crate::state::AppState;
 
 pub async fn crear_producto(
     req: HttpRequest,
     data: web::Data<AppState>,
-    body: web::Json<CrearProducto>,
+    body: web::Json<ProductoRequest>,
 ) -> Result<HttpResponse, ApiError> {
     let auth_header = req
         .headers()
@@ -114,7 +114,7 @@ pub async fn actualizar_producto(
     req: HttpRequest,
     data: web::Data<AppState>,
     path: web::Path<String>,
-    body: web::Json<ActualizarProducto>,
+    body: web::Json<ProductoRequest>,
 ) -> Result<HttpResponse, ApiError> {
     let auth_header = req
         .headers()
