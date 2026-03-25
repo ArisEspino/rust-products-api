@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
-use rust_decimal::Decimal;
+
 
 #[derive(Debug, Deserialize)]
 pub struct ProductoRequest {
     pub nombre: String,
-    pub precio: Decimal,
+    pub precio: i32,
     pub stock: i32,
 }
 
@@ -12,7 +12,7 @@ pub struct ProductoRequest {
 pub struct Producto {
     pub id: i32,
     pub nombre: String,
-    pub precio: Decimal,
+    pub precio: i32,
     pub stock: i32,
     pub creado_el: String,
 }

@@ -1,5 +1,4 @@
 use actix_web::{HttpRequest, HttpResponse, Responder, web};
-use rust_decimal::Decimal;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait};
 
@@ -32,11 +31,11 @@ pub async fn crear_producto(
         return Err(ApiError::InvalidInput);
     }
 
-    if body.precio <= Decimal::new(0, 0) {
+    if body.precio <= 0 {
         return Err(ApiError::InvalidInput);
     }
 
-    if body.stock < 0 {
+    if body.stock <= 0 {
         return Err(ApiError::InvalidInput);
     }
 
@@ -139,7 +138,7 @@ pub async fn actualizar_producto(
         return Err(ApiError::InvalidInput);
     }
 
-    if body.precio <= Decimal::new(0, 0) {
+    if body.precio <= 0 {
         return Err(ApiError::InvalidInput);
     }
 

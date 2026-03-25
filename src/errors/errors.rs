@@ -18,8 +18,8 @@ impl ResponseError for ApiError {
         match self {
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::InvalidInput => StatusCode::BAD_REQUEST,
-            ApiError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::Unauthorized => StatusCode::UNAUTHORIZED,
+            ApiError::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

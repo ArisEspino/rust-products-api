@@ -19,7 +19,7 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Productos::Nombre).string_len(150).not_null())
-                    .col(ColumnDef::new(Productos::Precio).decimal().not_null())
+                    .col(ColumnDef::new(Productos::Precio).integer().not_null())
                     .col(
                         ColumnDef::new(Productos::Stock)
                             .integer()
